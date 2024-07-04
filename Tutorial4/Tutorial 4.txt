@@ -1,0 +1,219 @@
+1)
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class RegistrationForm extends JFrame implements ActionListener {
+    private JTextField usernameField, emailField;
+    private JPasswordField passwordField, confirmPasswordField;
+    private JLabel usernameLabel, emailLabel, passwordLabel, confirmPasswordLabel;
+    private JButton registerButton;
+
+    public RegistrationForm() {
+        setTitle("Registration Form");
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new GridLayout(5, 2));
+
+        usernameLabel = new JLabel("Username:");
+        usernameField = new JTextField();
+
+        emailLabel = new JLabel("Email:");
+        emailField = new JTextField();
+
+        passwordLabel = new JLabel("Password:");
+        passwordField = new JPasswordField();
+
+        confirmPasswordLabel = new JLabel("Confirm Password:");
+        confirmPasswordField = new JPasswordField();
+
+        registerButton = new JButton("Register");
+        registerButton.addActionListener(this);
+
+        add(usernameLabel);
+        add(usernameField);
+        add(emailLabel);
+        add(emailField);
+        add(passwordLabel);
+        add(passwordField);
+        add(confirmPasswordLabel);
+        add(confirmPasswordField);
+        add(new JLabel()); // Empty label for spacing
+        add(registerButton);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == registerButton) {
+            // Perform registration logic here
+            String username = usernameField.getText();
+            String email = emailField.getText();
+            String password = new String(passwordField.getPassword());
+            String confirmPassword = new String(confirmPasswordField.getPassword());
+
+            // Validate and process the registration data (e.g., store in a database)
+
+            // For this example, we'll just display the input in a message dialog
+            String message = "Registration successful!\n\nUsername: " + username + "\nEmail: " + email;
+            JOptionPane.showMessageDialog(this, message, "Registration Success", JOptionPane.INFORMATION_MESSAGE);
+
+            // Clear the form fields after registration
+            usernameField.setText("");
+            emailField.setText("");
+            passwordField.setText("");
+            confirmPasswordField.setText("");
+        }
+    }
+
+    public static void main(String[] args) {
+        
+            RegistrationForm registrationForm = new RegistrationForm();
+            registrationForm.setVisible(true);
+        
+    }
+}
+
+
+
+2)
+import java.util.*;
+import java.sql.*;
+public class NewDataBase{
+    public static void main(String args[]){
+        try{
+            Scanner sc = new Scanner(System.in);
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1","root","root");
+            Statement stmt = con.createStatement();
+
+
+
+           
+             
+            ResultSet rs=stmt.executeQuery("select * from student");
+            while(rs.next())
+            {
+                System.out.println(rs.getInt(1) +" " +  rs.getString(2) + " " + rs.getString(3));
+                
+            }
+
+
+            PreparedStatement pstm = con.prepareStatement("UPDATE student SET branch = 'CSE' WHERE regno = (?)");
+            System.out.println("Enter Reg No To Update:");
+            int regno = sc.nextInt();
+
+            pstm.setInt(1,regno);
+            pstm.executeUpdate();
+
+            ResultSet rs1=stmt.executeQuery("select * from student");
+            System.out.println("After Deletion:");
+            while(rs1.next())
+            {
+                System.out.println(rs1.getInt(1) +" " +  rs1.getString(2) + " " + rs1.getString(3));
+            }
+
+
+            PreparedStatement pstm1 = con.prepareStatement("DELETE from student where regno = (?)");
+            System.out.println("Enter Reg No To Delete:");
+            int regno1 = sc.nextInt();
+
+            pstm1.setInt(1,regno1);
+            pstm1.executeUpdate();
+
+            ResultSet rs2=stmt.executeQuery("select * from student");
+            System.out.println("After Deletion:");
+            while(rs2.next())
+            {
+                System.out.println(rs2.getInt(1) +" " +  rs2.getString(2) + " " + rs2.getString(3));
+            }
+
+
+           
+            
+            con.close();
+            sc.close(); 
+        }catch(Exception e){ System.out.println(e);}
+    }
+}
+
+
+
+3) 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.util.*;
+import java.sql.*;
+
+
+public class StudentRegistrationFormDB {
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Student Registration Form");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 200);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(5, 2));
+
+        JLabel regNoLabel = new JLabel("Registration No:");
+        JTextField regNoField = new JTextField();
+
+        JLabel nameLabel = new JLabel("Name:");
+        JTextField nameField = new JTextField();
+
+        JLabel deptLabel = new JLabel("Department:");
+        JTextField deptField = new JTextField();
+
+        JButton submitButton = new JButton("Submit");
+
+        panel.add(regNoLabel);
+        panel.add(regNoField);
+        panel.add(nameLabel);
+        panel.add(nameField);
+        panel.add(deptLabel);
+        panel.add(deptField);
+        panel.add(new JLabel()); // Empty label for spacing
+        panel.add(submitButton);
+
+        frame.add(panel);
+
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int regno = Integer.parseInt(regNoField.getText());
+                String name = nameField.getText();
+                String branch = deptField.getText();
+
+                // Insert data into the database
+                try {
+
+                    //Class.forName("com.mysql.jdbc.Driver");
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "root", "root");
+                    String insertQuery = "INSERT INTO student (regno, name, branch) VALUES (?, ?, ?)";
+                    PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+                    preparedStatement.setInt(1, regno);
+                    preparedStatement.setString(2, name);
+                    preparedStatement.setString(3, branch);
+                    preparedStatement.executeUpdate();
+                    JOptionPane.showMessageDialog(frame, "Student record inserted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                    
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+                // Clear input fields after submission
+                regNoField.setText("");
+                nameField.setText("");
+                deptField.setText("");
+            }
+        });
+
+        frame.setVisible(true);
+    }
+}
+
